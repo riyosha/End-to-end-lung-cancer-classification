@@ -6,7 +6,7 @@ import zipfile
 from cvClassifier import logger
 from cvClassifier.utils.common import get_size
 
-from cvClassifier.entity import DataIngestionConfig
+from cvClassifier.entity.config_entity import DataIngestionConfig
 
 class DataIngestion: 
     # this class is helps with all the data ingestion related tasks
