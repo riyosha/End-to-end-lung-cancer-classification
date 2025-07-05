@@ -2,7 +2,8 @@ import os
 
 from cvClassifier.constants import *
 from cvClassifier.utils.common import read_yaml, create_directories 
-from cvClassifier.entity.config_entity import (DataIngestionConfig)
+from cvClassifier.entity.config_entity import (DataIngestionConfig,
+                                                ModelPreparationConfig)
 
 
 class ConfigurationManager:
@@ -28,3 +29,22 @@ class ConfigurationManager:
         )
 
         return data_ingestion_config
+
+    def get_model_preparation_config(self) -> ModelPreparationConfig:
+        ''' Gets the config details for the model preparation ingestion pipeline '''
+        config = self.config.model_preparation
+
+        create_directories([config.root_dir])
+
+        model_preparation_config = ModelPreparationConfig(
+            root_dir = config.root_dir,
+            base_model_path = config.base_model_path,
+            updated_base_model_path = config.updated_base_model_path,
+            params_image_size = self.params.IMAGE_SIZE,
+            params_include_top= self.params.INCLUDE_TOP,
+            params_classes = self.params.CLASSES,
+            params_weights = self.params.WEIGHTS,
+            params_learning_rate = self.params.LEARNING_RATE,
+        )
+
+        return model_preparation_config

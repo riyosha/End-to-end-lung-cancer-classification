@@ -9,6 +9,8 @@ matplotlib
 seaborn
 python-box==6.0.2
 pyYAML
+torch==2.4.1
+torchvision==0.19.1
 tqdm
 ensure==1.0.2
 joblib
