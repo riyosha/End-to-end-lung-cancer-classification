@@ -6,7 +6,13 @@ data_ingestion:
   local_data_file: artifacts/data_ingestion/data.zip
   unzip_dir: artifacts/data_ingestion
 
+
 model_preparation:
   root_dir: artifacts/model_preparation
-  base_model_path: artifacts/model_preparation/base_model.h5
-  updated_base_model_path: artifacts/model_preparation/updated_base_model.h5
+  base_model_path: artifacts/model_preparation/base_model.pth
+  updated_base_model_path: artifacts/model_preparation/updated_base_model.pth
+
+
+model_training:
+  root_dir: artifacts/training
+  trained_model_path: artifacts/training/model.h5
