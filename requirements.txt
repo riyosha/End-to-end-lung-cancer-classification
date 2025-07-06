@@ -9,6 +9,7 @@ matplotlib
 seaborn
 python-box==6.0.2
 pyYAML
+pytorch-lightning==2.4.0
 torch==2.4.1
 torchvision==0.19.1
 tqdm

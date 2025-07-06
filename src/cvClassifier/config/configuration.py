@@ -3,7 +3,8 @@ import os
 from cvClassifier.constants import *
 from cvClassifier.utils.common import read_yaml, create_directories 
 from cvClassifier.entity.config_entity import (DataIngestionConfig,
-                                                ModelPreparationConfig)
+                                                ModelPreparationConfig,
+                                                ModelTrainingConfig)
 
 
 class ConfigurationManager:
@@ -48,3 +49,27 @@ class ConfigurationManager:
         )
 
         return model_preparation_config
+    
+    def get_model_training_config(self) -> ModelTrainingConfig:
+        ''' Gets the config details for the model training pipeline '''
+        config = self.config.model_training
+        params = self.params
+        training_data = os.path.join(self.config.data_ingestion.unzip_dir, "Data/train")
+        validation_data = os.path.join(self.config.data_ingestion.unzip_dir, "Data/valid")
+        
+        create_directories([config.root_dir])
+
+        model_training_config = ModelTrainingConfig(
+            root_dir = config.root_dir,
+            updated_base_model_path = config.updated_base_model_path,
+            training_data_path = Path(training_data),
+            validation_data_path = Path(validation_data),
+            trained_model_path = config.trained_model_path,
+            params_epochs = params.EPOCHS,
+            params_batch_size = params.BATCH_SIZE,
+            params_is_augmentation = params.AUGMENTATION,
+            params_image_size = params.IMAGE_SIZE,
+            params_learning_rate = self.params.LEARNING_RATE
+        )
+
+        return model_training_config

@@ -1,11 +1,11 @@
 import os
-import urllib.request as requests
+
 from pathlib import Path
-from zipfile import ZipFile
 import torch
 import torch.nn as nn
 import torchvision.models as models
 from torchvision.models import VGG16_Weights
+
 from cvClassifier.entity.config_entity import ModelPreparationConfig
 from cvClassifier import logger
 
@@ -26,7 +26,7 @@ class ModelPreparation:
 
     @staticmethod
     def save_model(path: Path, model: nn.Module):
-        torch.save(model.state_dict(), path)
+        torch.save(model, path)
 
     @staticmethod
     def prepare_full_model(model, classes, freeze_all, freeze_till, learning_rate):
@@ -59,15 +59,15 @@ class ModelPreparation:
         criterion = nn.CrossEntropyLoss()
         optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
-        print(model)
-        print(f"Full model has {len(list(full_model.children()))} layers")
+        logger.info(f'full_model')
+        logger.info(f"Full model has {len(list(full_model.children()))} layers")
         print("Last few layers:")
         for i, layer in enumerate(list(full_model.children())[-3:]):
             print(f"  ({len(list(full_model.children()))-3+i}): {layer}")
 
         logger.info(f"Model prepared with {classes} classes, freeze_all={freeze_all}, freeze_till={freeze_till}, learning_rate={learning_rate}")
 
-        return model, optimizer, criterion
+        return full_model, optimizer, criterion
 
     def update_base_model(self):
         model, optimizer, criterion = self.prepare_full_model(
