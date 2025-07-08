@@ -17,6 +17,7 @@ class LightningModel(pl.LightningModule):
         self.model = model
         self.learning_rate = learning_rate
         self.criterion = nn.CrossEntropyLoss()
+        self.test_step_outputs = []
     
     def training_step(self, batch, batch_idx):
         inputs, labels = batch
@@ -37,8 +38,34 @@ class LightningModel(pl.LightningModule):
         self.log('val_loss', loss)
         self.log('val_acc', acc)
     
+    def test_step(self, batch, batch_idx):
+        inputs, labels = batch
+        outputs = self.model(inputs)
+        loss = self.criterion(outputs, labels)
+        acc = (outputs.argmax(dim=1) == labels).float().mean()
+        
+        # Store outputs for epoch-level metrics
+        self.test_step_outputs.append({'test_loss': loss, 'test_acc': acc})
+        
+        self.log('test_loss', loss, on_step=True, on_epoch=True)
+        self.log('test_acc', acc, on_step=True, on_epoch=True)
+        
+        return {'test_loss': loss, 'test_acc': acc}
+
     def configure_optimizers(self):
         return torch.optim.SGD(self.parameters(), lr=self.learning_rate)
+
+    def on_test_epoch_end(self):
+        # Calculate average metrics
+        if self.test_step_outputs:
+            avg_loss = torch.stack([x['test_loss'] for x in self.test_step_outputs]).mean()
+            avg_acc = torch.stack([x['test_acc'] for x in self.test_step_outputs]).mean()
+            
+            self.log('avg_test_loss', avg_loss)
+            self.log('avg_test_acc', avg_acc)
+            
+            # Clear the list for next epoch
+            self.test_step_outputs.clear()
 
 
 class ModelTraining:
