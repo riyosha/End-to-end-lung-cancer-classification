@@ -1,10 +1,11 @@
 import os
 
 from cvClassifier.constants import *
-from cvClassifier.utils.common import read_yaml, create_directories 
+from cvClassifier.utils.common import read_yaml, create_directories, save_json 
 from cvClassifier.entity.config_entity import (DataIngestionConfig,
                                                 ModelPreparationConfig,
-                                                ModelTrainingConfig)
+                                                ModelTrainingConfig,
+                                                ModelEvalConfig)
 
 
 class ConfigurationManager:
@@ -73,3 +74,21 @@ class ConfigurationManager:
         )
 
         return model_training_config
+    
+    def get_model_eval_config(self) -> ModelEvalConfig:
+        ''' Gets the config details for the model training pipeline '''
+        params = self.params
+        
+
+        model_eval_config = ModelEvalConfig(
+            training_data_path = self.config.model_training.training_data,
+            validation_data_path = self.config.model_training.validation_data,
+            test_data_path = self.config.model_training.test_data,
+            trained_model_path = self.config.model_training.trained_model_path,
+            all_params = params,
+            params_image_size = params.IMAGE_SIZE,
+            params_batch_size = params.BATCH_SIZE,
+            mlflow_uri = self.config.model_evaluation.mlflow_tracking_uri
+        )
+
+        return model_eval_config

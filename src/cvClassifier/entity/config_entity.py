@@ -32,3 +32,14 @@ class ModelTrainingConfig:
     params_image_size: int
     params_learning_rate: float
 
+@dataclass(frozen=True)
+class ModelEvalConfig:
+    trained_model_path: Path
+    training_data_path: Path
+    validation_data_path: Path
+    test_data_path: Path
+    all_params: dict
+    params_image_size: list
+    params_batch_size: int
+    mlflow_uri: str
+

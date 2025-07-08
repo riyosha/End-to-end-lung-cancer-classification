@@ -28,7 +28,7 @@ def read_yaml(path_to_yaml: Path) -> ConfigBox:
     try:
         with open(path_to_yaml, 'r') as f:
             content = yaml.safe_load(f)
-            logger.info(f'yaml file successfully load from {path_to_yaml}')
+            logger.info(f'yaml file successfully loaded from {path_to_yaml}')
             return ConfigBox(content)
     except BoxValueError:
         raise ValueError(f'yaml file is empty: {path_to_yaml}')
@@ -47,7 +47,7 @@ def create_directories(path_to_directories: list, verbose=True):
     for path in path_to_directories:
         os.makedirs(path, exist_ok=True)
         if verbose:
-            logger.info(f'directory created at: {path}')
+            logger.info(f'Directory created at: {path}')
 
 
 @ensure_annotations

@@ -16,4 +16,10 @@ model_preparation:
 model_training:
   root_dir: artifacts/model_training
   trained_model_path: artifacts/model_training/model.pth
+  training_data: artifacts/data_ingestion/Data/train
+  validation_data: artifacts/data_ingestion/Data/valid
+  test_data: artifacts/data_ingestion/Data/test
   updated_base_model_path: artifacts/model_preparation/updated_base_model.pth
+
+model_evaluation:
+  mlflow_tracking_uri: https://dagshub.com/riyosha/End-to-end-chest-cancer-classification.mlflow

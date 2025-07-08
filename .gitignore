@@ -196,3 +196,4 @@ cython_debug/
 artifacts/*
 research/Data/*
 lightning_logs/*
+*.env
