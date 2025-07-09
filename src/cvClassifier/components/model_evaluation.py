@@ -100,7 +100,7 @@ class ModelEvaluation:
         else:
             logger.info('No results returned from evaluation.')
         
-        self.save_score()
+        self.save_score(self.config.scores_path)
     
     
     def log_into_mlflow(self):
@@ -124,8 +124,7 @@ class ModelEvaluation:
             else:
                 mlflow.pytorch.log_model(self.model, "model")
 
-    def save_score(self):
+    def save_score(self, scores_path):
         """Save evaluation scores to JSON file"""
 
-        save_json(path=Path("scores.json"), data=self.scores)
-        logger.info(f"Scores saved to scores.json")
+        save_json(path=Path(scores_path), data=self.scores)

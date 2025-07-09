@@ -77,10 +77,12 @@ class ConfigurationManager:
     
     def get_model_eval_config(self) -> ModelEvalConfig:
         ''' Gets the config details for the model training pipeline '''
+        config = self.config.model_evaluation
         params = self.params
-        
+        create_directories([config.root_dir])
 
         model_eval_config = ModelEvalConfig(
+            root_dir = self.config.model_evaluation.root_dir,
             training_data_path = self.config.model_training.training_data,
             validation_data_path = self.config.model_training.validation_data,
             test_data_path = self.config.model_training.test_data,

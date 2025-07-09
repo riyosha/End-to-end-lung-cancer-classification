@@ -34,6 +34,7 @@ class ModelTrainingConfig:
 
 @dataclass(frozen=True)
 class ModelEvalConfig:
+    root_dir: Path
     trained_model_path: Path
     training_data_path: Path
     validation_data_path: Path

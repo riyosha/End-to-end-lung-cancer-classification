@@ -23,4 +23,5 @@ model_training:
 
 model_evaluation:
   mlflow_tracking_uri: https://dagshub.com/riyosha/End-to-end-chest-cancer-classification.mlflow
+  root_dir: artifacts/model_evaluation
   scores_path: artifacts/model_evaluation/scores.json
