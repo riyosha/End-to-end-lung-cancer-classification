@@ -1,7 +1,7 @@
 import os
 
 from cvClassifier.constants import *
-from cvClassifier.utils.common import read_yaml, create_directories, save_json 
+from cvClassifier.utils.common import read_yaml, create_directories
 from cvClassifier.entity.config_entity import (DataIngestionConfig,
                                                 ModelPreparationConfig,
                                                 ModelTrainingConfig,
