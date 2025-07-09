@@ -1,7 +1,7 @@
 import os
 from box.exceptions import BoxValueError
 import yaml
-from src.cvClassifier import logger
+from cvClassifier import logger
 import json
 import joblib
 from ensure import ensure_annotations

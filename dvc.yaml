@@ -1,0 +1,51 @@
+stages:
+  data_ingestion:
+    cmd: python src/cvClassifier/pipeline/S01_data_ingestion.py
+    deps:
+      - src/cvClassifier/pipeline/S01_data_ingestion.py
+      - config/config.yaml
+    outs:
+      - artifacts/data_ingestion/Data
+
+  model_preparation:
+    cmd: python src/cvClassifier/pipeline/S02_model_preparation.py
+    deps:
+      - src/cvClassifier/pipeline/S02_model_preparation.py
+      - config/config.yaml
+    params:
+      - IMAGE_SIZE
+      - INCLUDE_TOP
+      - CLASSES
+      - WEIGHTS
+      - LEARNING_RATE
+    outs:
+      - artifacts/model_preparation
+
+  model_training:
+    cmd: python src/cvClassifier/pipeline/S03_model_training.py
+    deps:
+      - src/cvClassifier/pipeline/S03_model_training.py
+      - artifacts/data_ingestion/Data
+      - artifacts/model_preparation
+      - config/config.yaml
+    params:
+      - BATCH_SIZE
+      - EPOCHS
+      - AUGMENTATION
+      - LEARNING_RATE
+      - IMAGE_SIZE
+    outs:
+      - artifacts/model_training/model.pth
+
+  model_evaluation:
+    cmd: python src/cvClassifier/pipeline/S04_model_evaluation.py
+    deps:
+      - src/cvClassifier/pipeline/S04_model_evaluation.py
+      - artifacts/model_training/model.pth
+      - artifacts/data_ingestion/Data
+      - config/config.yaml
+    params:
+      - IMAGE_SIZE
+      - BATCH_SIZE
+    outs:
+      - artifacts/model_evaluation/scores.json
