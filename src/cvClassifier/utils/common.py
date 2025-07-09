@@ -60,7 +60,7 @@ def save_json(path: Path, data: dict):
     """
     with open(path, 'w') as f:
         json.dump(data, f, indent=4)
-    logger.info(f'json file saved at {path}')
+    logger.info(f'JSON file saved at {path}')
 
 
 @ensure_annotations
@@ -76,7 +76,7 @@ def load_json(path: Path) -> ConfigBox:
 
     with open(path, 'r') as f:
         content = json.load(f)
-    logger.info(f'json file loaded from {path}')
+    logger.info(f'JSON file loaded from {path}')
     return ConfigBox(content)
  
 
@@ -89,7 +89,7 @@ def save_bin(data: Any, path: Path):
         path (Path): path to binary file
     """
     joblib.dump(value = data, filename = path)
-    logger.info(f'binary file saved at {path}')
+    logger.info(f'Binary file saved at {path}')
 
 @ensure_annotations
 def load_bin(path: Path) -> Any:
@@ -102,7 +102,7 @@ def load_bin(path: Path) -> Any:
         Any: object stored in the file
     """
     content = joblib.load(path)
-    logger.info(f'binary file loaded from {path}')
+    logger.info(f'Binary file loaded from {path}')
     return content
 
 @ensure_annotations
