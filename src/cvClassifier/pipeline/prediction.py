@@ -30,7 +30,7 @@ class PredictionPipeline:
 
     def predict(self):
         
-        model = torch.load(self.config.model_training.trained_model_path, map_location=self.device)
+        model = torch.load('model/model.pth', map_location=self.device)
         model.eval()
         img = Image.open(self.filename).convert("RGB")
         img = self.transform(img).unsqueeze(0).to(self.device)
