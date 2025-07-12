@@ -1,21 +1,21 @@
-pandas 
-gdown
+-e .
+Flask
+Flask-Cors
 dvc
+ensure==1.0.2
+gdown
+joblib
+matplotlib
 mlflow==2.2.2
 notebook
 numpy
-matplotlib
-seaborn
-python-box==6.0.2
+pandas
 pyYAML
+python-box==6.0.2
 pytorch-lightning==2.4.0
+scipy
+seaborn
 torch==2.4.1
 torchvision==0.19.1
 tqdm
-ensure==1.0.2
-joblib
 types-PyYAML
-scipy
-Flask
-Flask-Cors
--e .
