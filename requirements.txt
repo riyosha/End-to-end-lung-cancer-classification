@@ -9,6 +9,7 @@ matplotlib
 mlflow==2.2.2
 notebook
 numpy
+optuna>=3.0.0
 pandas
 pyYAML
 python-box==6.0.2

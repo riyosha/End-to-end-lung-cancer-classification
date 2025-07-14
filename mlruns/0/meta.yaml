@@ -1,6 +1,0 @@
-artifact_location: s3://chest-cancer-classifier/0
-creation_time: 1751071105436
-experiment_id: '0'
-last_update_time: 1751071105436
-lifecycle_stage: active
-name: Default
