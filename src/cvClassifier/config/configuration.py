@@ -52,12 +52,12 @@ class ConfigurationManager:
         return model_preparation_config
     
     def get_model_training_config(self) -> ModelTrainingConfig:
-        ''' Gets the config details for the model training pipeline '''
+        ' Gets the config details for the hyperparameter tuning pipeline '
         config = self.config.model_training
         params = self.params
-        training_data = os.path.join(self.config.data_ingestion.unzip_dir, "Data/train")
-        validation_data = os.path.join(self.config.data_ingestion.unzip_dir, "Data/valid")
-        
+        training_data = config.training_data
+        validation_data = config.validation_data
+
         create_directories([config.root_dir])
 
         model_training_config = ModelTrainingConfig(
@@ -66,11 +66,18 @@ class ConfigurationManager:
             training_data_path = Path(training_data),
             validation_data_path = Path(validation_data),
             trained_model_path = config.trained_model_path,
+            best_params_path = Path(config.root_dir) / "best_params.json",
             params_epochs = params.EPOCHS,
             params_batch_size = params.BATCH_SIZE,
             params_is_augmentation = params.AUGMENTATION,
             params_image_size = params.IMAGE_SIZE,
-            params_learning_rate = self.params.LEARNING_RATE
+            # Hyperparameter search space
+            learning_rate_range = params.LEARNING_RATE_RANGE,  # [min_lr, max_lr]
+            batch_size_options = params.BATCH_SIZE_OPTIONS ,   # Different batch sizes to try
+            epochs_options = params.EPOCHS_OPTIONS,        # Different epoch counts to try
+            n_trials = params.N_TRIALS,                       # Number of trials for optimization
+            timeout = params.TIMEOUT,                        # Timeout in seconds (1 hour)
+            mlflow_uri = config.mlflow_tracking_uri
         )
 
         return model_training_config

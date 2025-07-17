@@ -5,8 +5,8 @@ stages:
     deps:
     - path: config/config.yaml
       hash: md5
-      md5: 9681f93315281da4187130a1b61098a7
-      size: 1023
+      md5: 45c8cc8bb717efe8a4ff8c11b26668dc
+      size: 1120
     - path: src/cvClassifier/pipeline/S01_data_ingestion.py
       hash: md5
       md5: b96c9316e45ef5798ba5875c61a540e2
@@ -22,8 +22,8 @@ stages:
     deps:
     - path: config/config.yaml
       hash: md5
-      md5: 9681f93315281da4187130a1b61098a7
-      size: 1023
+      md5: 45c8cc8bb717efe8a4ff8c11b26668dc
+      size: 1120
     - path: src/cvClassifier/pipeline/S02_model_preparation.py
       hash: md5
       md5: 78381f7c750f46aaccea875c50136e28
@@ -41,7 +41,7 @@ stages:
     outs:
     - path: artifacts/model_preparation
       hash: md5
-      md5: b6ecf3e3e77afb42a4299570c327ca78.dir
+      md5: b34fbdbd71434031768d55772f4a2ac5.dir
       size: 118154628
       nfiles: 2
   model_training:
@@ -54,13 +54,13 @@ stages:
       nfiles: 1000
     - path: artifacts/model_preparation
       hash: md5
-      md5: b6ecf3e3e77afb42a4299570c327ca78.dir
+      md5: b34fbdbd71434031768d55772f4a2ac5.dir
       size: 118154628
       nfiles: 2
     - path: config/config.yaml
       hash: md5
-      md5: 9681f93315281da4187130a1b61098a7
-      size: 1023
+      md5: 45c8cc8bb717efe8a4ff8c11b26668dc
+      size: 1120
     - path: src/cvClassifier/pipeline/S03_model_training.py
       hash: md5
       md5: 5b73e10b0dd256cd93d64f8c72e931b6
@@ -78,7 +78,7 @@ stages:
     outs:
     - path: artifacts/model_training/model.pth
       hash: md5
-      md5: 64aa8fd005d3b8cb07f40d941c37b845
+      md5: c4a55f4baa9c571078bc170ba57257ca
       size: 59276610
   model_evaluation:
     cmd: python src/cvClassifier/pipeline/S04_model_evaluation.py
@@ -90,12 +90,12 @@ stages:
       nfiles: 1000
     - path: artifacts/model_training/model.pth
       hash: md5
-      md5: 64aa8fd005d3b8cb07f40d941c37b845
+      md5: c4a55f4baa9c571078bc170ba57257ca
       size: 59276610
     - path: config/config.yaml
       hash: md5
-      md5: 9681f93315281da4187130a1b61098a7
-      size: 1023
+      md5: 45c8cc8bb717efe8a4ff8c11b26668dc
+      size: 1120
     - path: src/cvClassifier/pipeline/S04_model_evaluation.py
       hash: md5
       md5: c5bd67f8d964bcc128eafa05021a1233
@@ -110,5 +110,5 @@ stages:
     outs:
     - path: artifacts/model_evaluation/scores.json
       hash: md5
-      md5: 4934e56cd3e409e7d9b0c9abc05833ca
-      size: 69
+      md5: dd7f81bee5c3dd274641addeed21c994
+      size: 71

@@ -19,18 +19,26 @@ class ModelPreparationConfig:
     params_weights: str
     params_learning_rate: float
 
-@dataclass(frozen=True)
+@dataclass
 class ModelTrainingConfig:
     root_dir: Path
     updated_base_model_path: Path
     training_data_path: Path
     validation_data_path: Path
     trained_model_path: Path
+    best_params_path: Path
     params_epochs: int
     params_batch_size: int
     params_is_augmentation: bool
     params_image_size: int
-    params_learning_rate: float
+    # Hyperparameter search space
+    learning_rate_range: list  
+    batch_size_options: list   
+    epochs_options: list     
+    n_trials: int             # Number of trials for optimization
+    timeout: int              # Timeout in seconds
+
+    mlflow_uri: str
 
 @dataclass(frozen=True)
 class ModelEvalConfig:
