@@ -5,7 +5,7 @@ stages:
     deps:
     - path: config/config.yaml
       hash: md5
-      md5: 45c8cc8bb717efe8a4ff8c11b26668dc
+      md5: 86e17afc848960c02d3c9936e8e59099
       size: 1120
     - path: src/cvClassifier/pipeline/S01_data_ingestion.py
       hash: md5
@@ -14,15 +14,15 @@ stages:
     outs:
     - path: artifacts/data_ingestion/Data
       hash: md5
-      md5: 3ddc2c0e262e947578d73eeec3119af6.dir
-      size: 124956798
-      nfiles: 1000
+      md5: aa93df70650f0a7f1d594ec7f562a6f1.dir
+      size: 124987534
+      nfiles: 1004
   model_preparation:
     cmd: python src/cvClassifier/pipeline/S02_model_preparation.py
     deps:
     - path: config/config.yaml
       hash: md5
-      md5: 45c8cc8bb717efe8a4ff8c11b26668dc
+      md5: 86e17afc848960c02d3c9936e8e59099
       size: 1120
     - path: src/cvClassifier/pipeline/S02_model_preparation.py
       hash: md5
@@ -41,7 +41,7 @@ stages:
     outs:
     - path: artifacts/model_preparation
       hash: md5
-      md5: b34fbdbd71434031768d55772f4a2ac5.dir
+      md5: f54852c3feb6a9c7c0c43d09462766fb.dir
       size: 118154628
       nfiles: 2
   model_training:
@@ -49,17 +49,17 @@ stages:
     deps:
     - path: artifacts/data_ingestion/Data
       hash: md5
-      md5: 3ddc2c0e262e947578d73eeec3119af6.dir
-      size: 124956798
-      nfiles: 1000
+      md5: aa93df70650f0a7f1d594ec7f562a6f1.dir
+      size: 124987534
+      nfiles: 1004
     - path: artifacts/model_preparation
       hash: md5
-      md5: b34fbdbd71434031768d55772f4a2ac5.dir
+      md5: f54852c3feb6a9c7c0c43d09462766fb.dir
       size: 118154628
       nfiles: 2
     - path: config/config.yaml
       hash: md5
-      md5: 45c8cc8bb717efe8a4ff8c11b26668dc
+      md5: 86e17afc848960c02d3c9936e8e59099
       size: 1120
     - path: src/cvClassifier/pipeline/S03_model_training.py
       hash: md5
@@ -69,32 +69,49 @@ stages:
       params.yaml:
         AUGMENTATION: true
         BATCH_SIZE: 16
+        BATCH_SIZE_OPTIONS:
+        - 16
+        - 32
+        - 64
         EPOCHS: 1
+        EPOCHS_OPTIONS:
+        - 25
+        - 30
+        - 50
+        - 75
+        - 100
+        - 300
+        - 500
         IMAGE_SIZE:
         - 224
         - 224
         - 3
         LEARNING_RATE: 0.01
+        LEARNING_RATE_RANGE:
+        - 0.001
+        - 0.01
+        N_TRIALS: 10
+        TIMEOUT: 1800
     outs:
     - path: artifacts/model_training/model.pth
       hash: md5
-      md5: c4a55f4baa9c571078bc170ba57257ca
+      md5: fb87d4321c0e385c7f8b9aa5942a27c6
       size: 59276610
   model_evaluation:
     cmd: python src/cvClassifier/pipeline/S04_model_evaluation.py
     deps:
     - path: artifacts/data_ingestion/Data
       hash: md5
-      md5: 3ddc2c0e262e947578d73eeec3119af6.dir
-      size: 124956798
-      nfiles: 1000
+      md5: aa93df70650f0a7f1d594ec7f562a6f1.dir
+      size: 124987534
+      nfiles: 1004
     - path: artifacts/model_training/model.pth
       hash: md5
-      md5: c4a55f4baa9c571078bc170ba57257ca
+      md5: fb87d4321c0e385c7f8b9aa5942a27c6
       size: 59276610
     - path: config/config.yaml
       hash: md5
-      md5: 45c8cc8bb717efe8a4ff8c11b26668dc
+      md5: 86e17afc848960c02d3c9936e8e59099
       size: 1120
     - path: src/cvClassifier/pipeline/S04_model_evaluation.py
       hash: md5
@@ -110,5 +127,5 @@ stages:
     outs:
     - path: artifacts/model_evaluation/scores.json
       hash: md5
-      md5: dd7f81bee5c3dd274641addeed21c994
-      size: 71
+      md5: f644e935cf6fb8c100c1d6fb97adee05
+      size: 70

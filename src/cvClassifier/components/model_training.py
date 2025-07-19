@@ -19,6 +19,7 @@ import mlflow
 from pytorch_lightning.loggers import MLFlowLogger
 from torchmetrics.classification import MulticlassPrecision, MulticlassRecall, \
                                        MulticlassF1Score, MulticlassAUROC
+from pytorch_lightning.callbacks import EarlyStopping
 
 
 class LightningModel(pl.LightningModule):
@@ -275,12 +276,20 @@ class ModelTraining:
                 run_id=run.info.run_id # Associated with the current MLflow run
             )
 
+            early_stopping = EarlyStopping(
+                monitor='val_loss',           
+                patience=5,                   
+                mode='min',                   
+                verbose=True                  
+            )
+
             # create new pytorch lightning trainer
             trainer = pl.Trainer(
                 max_epochs=epochs,
                 accelerator='auto',
                 devices='auto',
                 logger=mlflow_logger,
+                callbacks=[early_stopping],
                 enable_progress_bar=False, # Disable progress bar for cleaner Optuna output
                 enable_model_summary=False,
                 log_every_n_steps=10

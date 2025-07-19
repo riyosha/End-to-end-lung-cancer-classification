@@ -34,6 +34,11 @@ stages:
       - AUGMENTATION
       - LEARNING_RATE
       - IMAGE_SIZE
+      - LEARNING_RATE_RANGE
+      - BATCH_SIZE_OPTIONS
+      - EPOCHS_OPTIONS
+      - N_TRIALS
+      - TIMEOUT
     outs:
       - artifacts/model_training/model.pth
 
