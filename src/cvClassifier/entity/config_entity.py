@@ -54,4 +54,5 @@ class ModelEvalConfig:
     params_batch_size: int
     mlflow_uri: str
     scores_path: Path
+    final_model_path: Path
 

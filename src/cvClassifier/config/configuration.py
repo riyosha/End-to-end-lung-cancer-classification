@@ -100,7 +100,8 @@ class ConfigurationManager:
             params_image_size = params.IMAGE_SIZE,
             params_batch_size = params.BATCH_SIZE,
             mlflow_uri = self.config.model_evaluation.mlflow_tracking_uri,
-            scores_path = self.config.model_evaluation.scores_path
+            scores_path = self.config.model_evaluation.scores_path,
+            final_model_path = self.config.model_evaluation.final_model_path
         )
 
         return model_eval_config

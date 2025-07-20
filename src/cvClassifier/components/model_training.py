@@ -442,6 +442,7 @@ class ModelTraining:
 
         # Save to a JSON file
         best_scores_path = Path(self.config.root_dir) / f"best_scores_{self.config.model_name}.json"
-        save_json(best_scores_path, best_scores)
+        with open(best_scores_path, "w") as f:
+            json.dump(best_scores, f, indent=2)
         
         return trainer.callback_metrics

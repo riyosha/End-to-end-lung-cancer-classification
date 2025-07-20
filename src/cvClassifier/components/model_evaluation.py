@@ -1,4 +1,5 @@
 import os
+import shutil
 
 from urllib.parse import urlparse
 import torch
@@ -13,7 +14,7 @@ from pathlib import Path
 import mlflow
 
 from cvClassifier.entity.config_entity import ModelEvalConfig
-from cvClassifier.utils.common import save_json
+from cvClassifier.utils.common import save_json, load_json
 from cvClassifier import logger
 from cvClassifier.components.model_training import LightningModel
 
@@ -66,7 +67,7 @@ class ModelEvaluation:
 
         logger.info('Starting model evaluation...')
         
-        self.model = self.load_model(self.config.trained_model_path)
+        self.model = self.load_model(self.config.final_model_path)
         self.model.eval()
         
         self.test_generator()
@@ -100,7 +101,7 @@ class ModelEvaluation:
         else:
             logger.info('No results returned from evaluation.')
         
-        self.save_score(self.config.scores_path)
+        self.save_score(f'{self.config.scores_path}/final_scores.json')
     
     
     def log_into_mlflow(self):
@@ -123,6 +124,35 @@ class ModelEvaluation:
                 mlflow.pytorch.log_model(self.model, "model", registered_model_name="VGG16Model")
             else:
                 mlflow.pytorch.log_model(self.model, "model")
+
+    def select_best_model(self, model_names, metric="val_f1_score"):
+        best_model = None
+        best_score = float('-inf')
+        best_model_path = None
+
+        for model_name in model_names:
+            scores_path = Path(self.config.scores_path) / f"best_scores_{model_name}.json"
+            model_path = Path(self.config.scores_path) / f"trained_model_{model_name}.pth"
+            if not scores_path.exists() or not model_path.exists():
+                logger.info(f"Skipping {model_name}: missing files.")
+                continue
+
+            scores = load_json(path=scores_path)
+            score = scores.get(metric)
+            logger.info(f"{model_name}: {metric} = {score}")
+
+            if score is not None and score > best_score:
+                best_score = score
+                best_model = model_name
+                best_model_path = model_path
+
+        if best_model_path:
+            # Ensure destination directory exists
+            shutil.copy2(best_model_path, self.config.final_model_path)
+            logger.info(f"Best model: {best_model} (score: {best_score}) copied to {self.config.final_model_path}")
+            return best_model, best_score
+        else:
+            raise RuntimeError("No valid models found for selection.")
 
     def save_score(self, scores_path):
         """Save evaluation scores to JSON file"""
