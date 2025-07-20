@@ -12,6 +12,7 @@ class ModelTrainingPipeline:
         config = ConfigurationManager()
         models = ['vgg16', 'resnet50']
         for model_name in models:
+            logger.info(f"Starting model training for {model_name}...")
             training_config = config.get_model_training_config(model_name=model_name)
             training = ModelTraining(config=training_config)
             training.get_base_model()
