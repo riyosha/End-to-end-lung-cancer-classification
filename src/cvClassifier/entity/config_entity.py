@@ -11,6 +11,7 @@ class DataIngestionConfig:
 @dataclass(frozen=True)
 class ModelPreparationConfig:
     root_dir: Path
+    model_name: str
     base_model_path: Path
     updated_base_model_path: Path
     params_image_size: list

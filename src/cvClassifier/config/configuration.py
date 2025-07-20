@@ -40,13 +40,14 @@ class ConfigurationManager:
 
         model_preparation_config = ModelPreparationConfig(
             root_dir = config.root_dir,
-            base_model_path = config.base_model_path,
-            updated_base_model_path = config.updated_base_model_path,
+            model_name = config.model_name,
+            base_model_path = f'{config.base_model_path}/base_model_{config.model_name}.pth',
+            updated_base_model_path = f'{config.updated_base_model_path}/updated_base_model_{config.model_name}.pth',
             params_image_size = self.params.IMAGE_SIZE,
             params_include_top= self.params.INCLUDE_TOP,
             params_classes = self.params.CLASSES,
             params_weights = self.params.WEIGHTS,
-            params_learning_rate = self.params.LEARNING_RATE,
+            params_learning_rate = self.params.LEARNING_RATE
         )
 
         return model_preparation_config
