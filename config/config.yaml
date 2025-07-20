@@ -17,7 +17,7 @@ model_preparation:
 model_training:
   model_name: resnet50
   root_dir: artifacts/model_training
-  trained_model_path: artifacts/model_training/model.pth
+  trained_model_path: artifacts/model_training
   training_data: artifacts/data_ingestion/Data/train
   validation_data: artifacts/data_ingestion/Data/valid
   test_data: artifacts/data_ingestion/Data/test

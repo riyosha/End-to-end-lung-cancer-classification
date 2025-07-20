@@ -8,7 +8,7 @@ class DataIngestionConfig:
     local_data_file: Path
     unzip_dir: Path
 
-@dataclass(frozen=True)
+@dataclass
 class ModelPreparationConfig:
     root_dir: Path
     model_name: str
@@ -23,6 +23,7 @@ class ModelPreparationConfig:
 @dataclass
 class ModelTrainingConfig:
     root_dir: Path
+    model_name: str
     updated_base_model_path: Path
     training_data_path: Path
     validation_data_path: Path

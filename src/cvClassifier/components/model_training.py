@@ -72,19 +72,11 @@ class LightningModel(pl.LightningModule):
         return {'test_loss': loss, 'test_acc': acc}
 
     def configure_optimizers(self):
-        return torch.optim.SGD(self.parameters(), lr=self.learning_rate)
-
-    def on_test_epoch_end(self):
-        # Calculate average metrics
-        if self.test_step_outputs:
-            avg_loss = torch.stack([x['test_loss'] for x in self.test_step_outputs]).mean()
-            avg_acc = torch.stack([x['test_acc'] for x in self.test_step_outputs]).mean()
-            
-            self.log('avg_test_loss', avg_loss)
-            self.log('avg_test_acc', avg_acc)
-            
-            # Clear the list for next epoch
-            self.test_step_outputs.clear()
+        return torch.optim.Adam(
+            self.parameters(), 
+            lr=self.learning_rate,           
+            weight_decay=1e-5
+        )
 
     def on_validation_epoch_end(self):
 
@@ -148,7 +140,7 @@ class ModelTraining:
         
         # Set up MLflow
         mlflow.set_tracking_uri(self.config.mlflow_uri)
-        mlflow.set_experiment("hyperparameter_tuning")
+        mlflow.set_experiment(f"hyperparameter_tuning_{self.config.model_name}")
 
         logger.info(f"Using device: {self.device}")
 
@@ -271,7 +263,7 @@ class ModelTraining:
 
             # create an mlflow logger
             mlflow_logger = MLFlowLogger(
-                experiment_name="hyperparameter_tuning",
+                experiment_name=f"hyperparameter_tuning_{self.config.model_name}",
                 tracking_uri=self.config.mlflow_uri,
                 run_id=run.info.run_id # Associated with the current MLflow run
             )
@@ -354,7 +346,7 @@ class ModelTraining:
         logger.info(f"Best validation loss: {self.best_score:.4f}")
         
         # Save best parameters
-        best_params_path = Path(self.config.root_dir)/"best_params.json"
+        best_params_path = Path(self.config.root_dir)/f"best_params_{self.config.model_name}.json"
         save_json(best_params_path, self.best_params)
         
         return self.best_params
@@ -373,7 +365,7 @@ class ModelTraining:
                 mlflow.pytorch.log_model(
                     lightning_model.model, 
                     "model", 
-                    registered_model_name="VGG16Model"
+                    registered_model_name=self.config.model_name
                 )
             else:
                 mlflow.pytorch.log_model(lightning_model.model, "model")
@@ -406,7 +398,7 @@ class ModelTraining:
         # Set up model checkpointing
         checkpoint_callback = ModelCheckpoint(
             dirpath=self.config.root_dir,
-            filename="best_model",
+            filename=f"best_model_{self.config.model_name}",
             monitor="val_loss",
             mode="min",
             save_top_k=1
@@ -414,9 +406,12 @@ class ModelTraining:
 
         # Set up MLflow logger for final training
         mlflow_logger = MLFlowLogger(
-            experiment_name="best_parameters_training",
+            experiment_name=f"best_parameters_training_{self.config.model_name}",
             tracking_uri=self.config.mlflow_uri
         )
+
+        # Log best parameters to MLflow
+        mlflow.log_params(self.best_params)
         
         # Create trainer with best epochs
         trainer = pl.Trainer(
@@ -438,65 +433,15 @@ class ModelTraining:
         )
         
         # Save the final model
+        logger.info(f"Saving final model to {self.config.trained_model_path}")
         torch.save(lightning_model.model, self.config.trained_model_path)
-        
         logger.info(f"Final model saved to {self.config.trained_model_path}")
-        
-        return trainer.callback_metrics
 
-'''
-    def train(self):
-        # Create Lightning model
-        lightning_model = LightningModel(
-            model=self.model,
-            learning_rate=self.config.params_learning_rate
-        )
+        # Log best scores
+        best_scores = {k: (v.item() if hasattr(v, "item") else v) for k, v in trainer.callback_metrics.items()}
+
+        # Save to a JSON file
+        best_scores_path = Path(self.config.root_dir) / f"best_scores_{self.config.model_name}.json"
+        save_json(best_scores_path, best_scores)
         
-        # Create trainer with automatic logging and progress bars
-        trainer = pl.Trainer(
-            max_epochs=self.config.params_epochs,
-            accelerator='auto',  # Automatically use GPU if available
-            devices='auto',      # Use all available devices
-            logger=True,         # Enable logging
-            enable_progress_bar=True,
-            enable_model_summary=True,
-            enable_checkpointing=True,
-            log_every_n_steps=50,
-        )
-        
-        logger.info("Starting training with PyTorch Lightning...")
-        
-        # Train the model (this replaces all your manual training loop!)
-        trainer.fit(
-            model=lightning_model,
-            train_dataloaders=self.train_loader,
-            val_dataloaders=self.valid_loader
-        )
-        
-        # Get final metrics
-        train_metrics = trainer.callback_metrics
-        
-        logger.info("Training completed!")
-        logger.info("=" * 60)
-        logger.info("FINAL TRAINING METRICS:")
-        
-        # Print final metrics
-        for key, value in train_metrics.items():
-            if isinstance(value, torch.Tensor):
-                logger.info(f"{key}: {value.item():.4f}")
-            else:
-                logger.info(f"{key}: {value}")
-        
-        logger.info("=" * 60)
-        
-        # Save the trained model
-        self.save_model(
-            path=self.config.trained_model_path,
-            model=lightning_model.model  # Extract the actual model
-        )
-        
-        logger.info(f"Model trained and saved to {self.config.trained_model_path}")
-        
-        # Return training history for analysis
         return trainer.callback_metrics
-'''

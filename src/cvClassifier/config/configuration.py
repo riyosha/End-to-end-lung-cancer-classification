@@ -32,7 +32,7 @@ class ConfigurationManager:
 
         return data_ingestion_config
 
-    def get_model_preparation_config(self) -> ModelPreparationConfig:
+    def get_model_preparation_config(self, model_name) -> ModelPreparationConfig:
         ''' Gets the config details for the model preparation ingestion pipeline '''
         config = self.config.model_preparation
 
@@ -40,9 +40,9 @@ class ConfigurationManager:
 
         model_preparation_config = ModelPreparationConfig(
             root_dir = config.root_dir,
-            model_name = config.model_name,
-            base_model_path = f'{config.base_model_path}/base_model_{config.model_name}.pth',
-            updated_base_model_path = f'{config.updated_base_model_path}/updated_base_model_{config.model_name}.pth',
+            model_name = model_name,
+            base_model_path = f'{config.base_model_path}/base_model_{model_name}.pth',
+            updated_base_model_path = f'{config.updated_base_model_path}/updated_base_model_{model_name}.pth',
             params_image_size = self.params.IMAGE_SIZE,
             params_include_top= self.params.INCLUDE_TOP,
             params_classes = self.params.CLASSES,
@@ -52,7 +52,7 @@ class ConfigurationManager:
 
         return model_preparation_config
     
-    def get_model_training_config(self) -> ModelTrainingConfig:
+    def get_model_training_config(self, model_name) -> ModelTrainingConfig:
         ' Gets the config details for the hyperparameter tuning pipeline '
         config = self.config.model_training
         params = self.params
@@ -63,11 +63,12 @@ class ConfigurationManager:
 
         model_training_config = ModelTrainingConfig(
             root_dir = config.root_dir,
-            updated_base_model_path = config.updated_base_model_path,
+            model_name = model_name,
+            updated_base_model_path = f'{config.updated_base_model_path}/updated_base_model_{model_name}.pth',
             training_data_path = Path(training_data),
             validation_data_path = Path(validation_data),
-            trained_model_path = config.trained_model_path,
-            best_params_path = Path(config.root_dir) / "best_params.json",
+            trained_model_path = f'{config.trained_model_path}/trained_model_{model_name}.pth',
+            best_params_path = Path(config.root_dir) / f"best_params_{model_name}.json",
             params_epochs = params.EPOCHS,
             params_batch_size = params.BATCH_SIZE,
             params_is_augmentation = params.AUGMENTATION,

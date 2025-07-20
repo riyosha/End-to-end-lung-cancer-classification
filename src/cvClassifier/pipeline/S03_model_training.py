@@ -10,12 +10,16 @@ class ModelTrainingPipeline:
 
     def main(self):
         config = ConfigurationManager()
-        training_config = config.get_model_training_config()
-        training = ModelTraining(config=training_config)
-        training.get_base_model()
-        training.train_valid_generator()
-        training.train()
+        models = ['vgg16', 'resnet50']
+        for model_name in models:
+            training_config = config.get_model_training_config(model_name=model_name)
+            training = ModelTraining(config=training_config)
+            training.get_base_model()
+            training.train_valid_generator()
+            training.train()
+            logger.info(f"Model training for {model_name} completed successfully.")
 
+        logger.info("All models trained successfully.")
 
 if __name__ == '__main__':
     try:

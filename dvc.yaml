@@ -25,6 +25,7 @@ stages:
     cmd: python src/cvClassifier/pipeline/S03_model_training.py
     deps:
       - src/cvClassifier/pipeline/S03_model_training.py
+      - src/cvClassifier/components/model_training.py
       - artifacts/data_ingestion/Data
       - artifacts/model_preparation
       - config/config.yaml
@@ -40,12 +41,14 @@ stages:
       - N_TRIALS
       - TIMEOUT
     outs:
-      - artifacts/model_training/model.pth
+      - artifacts/model_training/trained_model_resnet50.pth
+      - artifacts/model_training/trained_model_vgg16.pth
 
   model_evaluation:
     cmd: python src/cvClassifier/pipeline/S04_model_evaluation.py
     deps:
       - src/cvClassifier/pipeline/S04_model_evaluation.py
+      - src/cvClassifier/components/model_evaluation.py
       - artifacts/model_training/model.pth
       - artifacts/data_ingestion/Data
       - config/config.yaml
