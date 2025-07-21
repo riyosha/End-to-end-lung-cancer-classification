@@ -35,6 +35,11 @@ class LightningModel(pl.LightningModule):
         self.val_f1 = MulticlassF1Score(num_classes=4, average='weighted', validate_args=True)
         self.val_auc = MulticlassAUROC(num_classes=4, average='weighted', validate_args=True)
 
+        self.test_precision = MulticlassPrecision(num_classes=4, average='weighted', validate_args=True)
+        self.test_recall = MulticlassRecall(num_classes=4, average='weighted', validate_args=True)
+        self.test_f1 = MulticlassF1Score(num_classes=4, average='weighted', validate_args=True)
+        self.test_auc = MulticlassAUROC(num_classes=4, average='weighted', validate_args=True)
+
         self.validation_step_outputs = []
         self.test_step_outputs = []
     
@@ -117,10 +122,37 @@ class LightningModel(pl.LightningModule):
         
         self.log('test_loss', loss, on_step=True, on_epoch=True)
         self.log('test_acc', acc, on_step=True, on_epoch=True)
+
+        preds_probs = torch.softmax(outputs, dim=-1) # Probabilities for AUROC and other metrics if needed
+        preds_labels = outputs.argmax(dim=-1) # Predicted class labels for precision/recall/f1 if not using probabilities
+
+        # Update with probabilities for AUROC, and with predicted labels/probabilities for others
+        # Depending on the metric, it might expect one-hot encoded targets or class indices.
+        # For Multiclass metrics, typically raw logits or probabilities and integer class labels are used.
+        self.test_precision.update(preds_probs, labels)
+        self.test_recall.update(preds_probs, labels)
+        self.test_f1.update(preds_probs, labels)
+        self.test_auc.update(preds_probs, labels)
         
         return {'test_loss': loss, 'test_acc': acc}
     
     def on_test_epoch_end(self):
+
+        avg_precision = self.test_precision.compute()
+        avg_recall = self.test_recall.compute()
+        avg_f1 = self.test_f1.compute()
+        avg_auc = self.test_auc.compute()
+
+        self.log('test_precision', avg_precision, prog_bar=True)
+        self.log('test_recall', avg_recall, prog_bar=True)
+        self.log('test_f1_score', avg_f1, prog_bar=True)
+        self.log('test_auc_roc', avg_auc, prog_bar=True)
+
+        self.test_precision.reset()
+        self.test_recall.reset()
+        self.test_f1.reset()
+        self.test_auc.reset()
+
         # Calculate average metrics
         if self.test_step_outputs:
             avg_loss = torch.stack([x['test_loss'] for x in self.test_step_outputs]).mean()

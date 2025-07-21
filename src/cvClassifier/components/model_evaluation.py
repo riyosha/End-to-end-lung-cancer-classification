@@ -18,6 +18,10 @@ from cvClassifier.utils.common import save_json, load_json
 from cvClassifier import logger
 from cvClassifier.components.model_training import LightningModel
 
+from torchmetrics.classification import (
+    MulticlassPrecision, MulticlassRecall, MulticlassF1Score, MulticlassAUROC, MulticlassAccuracy
+)
+
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -90,14 +94,18 @@ class ModelEvaluation:
         )
         
         if test_results and len(test_results) > 0:
+            # test_results[0] will have all logged metrics
             self.scores = {
-                "loss": test_results[0].get('test_loss_epoch', 0.0),
-                "accuracy": test_results[0].get('test_acc_epoch', 0.0)
+                "loss": test_results[0].get('test_loss', 0.0),
+                "accuracy": test_results[0].get('test_accuracy', 0.0),
+                "precision": test_results[0].get('test_precision', 0.0),
+                "recall": test_results[0].get('test_recall', 0.0),
+                "f1_score": test_results[0].get('test_f1_score', 0.0),
+                "auc_roc": test_results[0].get('test_auc_roc', 0.0)
             }
             logger.info(f"Evaluation completed!")
-            logger.info(f"Loss: {self.scores['loss']:.4f}")
-            logger.info(f"Accuracy: {self.scores['accuracy']:.4f}")
-            
+            for k, v in self.scores.items():
+                logger.info(f"{k.capitalize()}: {v:.4f}")
         else:
             logger.info('No results returned from evaluation.')
         
