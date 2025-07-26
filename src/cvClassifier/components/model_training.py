@@ -35,11 +35,6 @@ class LightningModel(pl.LightningModule):
         self.val_f1 = MulticlassF1Score(num_classes=4, average='weighted', validate_args=True)
         self.val_auc = MulticlassAUROC(num_classes=4, average='weighted', validate_args=True)
 
-        self.test_precision = MulticlassPrecision(num_classes=4, average='weighted', validate_args=True)
-        self.test_recall = MulticlassRecall(num_classes=4, average='weighted', validate_args=True)
-        self.test_f1 = MulticlassF1Score(num_classes=4, average='weighted', validate_args=True)
-        self.test_auc = MulticlassAUROC(num_classes=4, average='weighted', validate_args=True)
-
         self.validation_step_outputs = []
         self.test_step_outputs = []
     
@@ -122,37 +117,10 @@ class LightningModel(pl.LightningModule):
         
         self.log('test_loss', loss, on_step=True, on_epoch=True)
         self.log('test_acc', acc, on_step=True, on_epoch=True)
-
-        preds_probs = torch.softmax(outputs, dim=-1) # Probabilities for AUROC and other metrics if needed
-        preds_labels = outputs.argmax(dim=-1) # Predicted class labels for precision/recall/f1 if not using probabilities
-
-        # Update with probabilities for AUROC, and with predicted labels/probabilities for others
-        # Depending on the metric, it might expect one-hot encoded targets or class indices.
-        # For Multiclass metrics, typically raw logits or probabilities and integer class labels are used.
-        self.test_precision.update(preds_probs, labels)
-        self.test_recall.update(preds_probs, labels)
-        self.test_f1.update(preds_probs, labels)
-        self.test_auc.update(preds_probs, labels)
         
         return {'test_loss': loss, 'test_acc': acc}
     
     def on_test_epoch_end(self):
-
-        avg_precision = self.test_precision.compute()
-        avg_recall = self.test_recall.compute()
-        avg_f1 = self.test_f1.compute()
-        avg_auc = self.test_auc.compute()
-
-        self.log('test_precision', avg_precision, prog_bar=True)
-        self.log('test_recall', avg_recall, prog_bar=True)
-        self.log('test_f1_score', avg_f1, prog_bar=True)
-        self.log('test_auc_roc', avg_auc, prog_bar=True)
-
-        self.test_precision.reset()
-        self.test_recall.reset()
-        self.test_f1.reset()
-        self.test_auc.reset()
-
         # Calculate average metrics
         if self.test_step_outputs:
             avg_loss = torch.stack([x['test_loss'] for x in self.test_step_outputs]).mean()
@@ -169,6 +137,10 @@ class ModelTraining:
     def __init__(self, config: ModelTrainingConfig):
         self.config = config
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+        if mlflow.active_run():
+            logger.warning("Found active MLflow run during initialization. Ending it.")
+            mlflow.end_run()
         
         # Set up MLflow
         mlflow.set_tracking_uri(self.config.mlflow_uri)
@@ -274,7 +246,10 @@ class ModelTraining:
         
         logger.info(f"Trial {trial.number}: lr={learning_rate:.6f}, batch_size={batch_size}, epochs={epochs}")
 
-        with mlflow.start_run(nested=True) as run:
+        # Create descriptive run name
+        trial_name = f"trial_{trial.number:02d}_lr{learning_rate:.4f}_bs{batch_size}_ep{epochs}"
+
+        with mlflow.start_run(nested=True, run_name = trial_name) as run:
             
             # log hyperparameters
             mlflow.log_params({
@@ -405,76 +380,125 @@ class ModelTraining:
 
     def train(self):
         """Train with hyperparameter optimization"""
+
+        # End any existing active runs before starting
+        if mlflow.active_run():
+            logger.warning("Found active MLflow run. Ending it before starting new run.")
+            mlflow.end_run()
+
+        with mlflow.start_run(run_name=f"hyperparameter_tuning_{self.self.config.model_name}") as parent_run:
         
-        # Run hyperparameter optimization first
-        self.optimize_hyperparameters()
+            # Log parent run metadata
+            mlflow.log_param("model_architecture", self.config.model_name)
+            mlflow.log_param("n_trials", self.config.n_trials)
+            mlflow.log_param("timeout", self.config.timeout)
+            
+            logger.info("Starting hyperparameter optimization within parent run...")
         
-        # Train final model with best parameters
-        return self.train_with_best_params()
+            # Run hyperparameter optimization first
+            self.optimize_hyperparameters()
+
+            # Log best params to parent run
+            mlflow.log_params({f"best_{k}": v for k, v in self.best_params.items()})
+            mlflow.log_metric("best_validation_loss", self.best_score)
+
+            final_metrics = self.train_with_best_params()
+
+            # Log summary metrics to parent run
+            if final_metrics:
+                summary_metrics = {}
+                for key, value in final_metrics.items():
+                    if value is not None:
+                        metric_name = f"final_{key}"
+                        summary_metrics[metric_name] = value.item() if hasattr(value, 'item') else value
+                
+                mlflow.log_metrics(summary_metrics)
+        
+        logger.info(f"Complete training for {self.config.model_name} finished.")
+        
+        return final_metrics
 
     def train_with_best_params(self):
         """Train the final model with best hyperparameters"""
         if self.best_params is None:
             logger.warning("No best parameters found. Running optimization first...")
             self.optimize_hyperparameters()
-        
-        # Create data loaders with best batch size
-        train_loader, valid_loader = self.train_valid_generator(self.best_params['batch_size'])
-        
-        # Create Lightning model with best learning rate
-        lightning_model = LightningModel(
-            model=self.model,
-            learning_rate=self.best_params['learning_rate']
-        )
-        
-        # Set up model checkpointing
-        checkpoint_callback = ModelCheckpoint(
-            dirpath=self.config.root_dir,
-            filename=f"best_model_{self.config.model_name}",
-            monitor="val_loss",
-            mode="min",
-            save_top_k=1
-        )
 
-        # Set up MLflow logger for final training
-        mlflow_logger = MLFlowLogger(
-            experiment_name=f"best_parameters_training_{self.config.model_name}",
-            tracking_uri=self.config.mlflow_uri
-        )
 
-        # Log best parameters to MLflow
-        mlflow.log_params(self.best_params)
+        with mlflow.start_run(nested=True, run_name=f"final_training_{self.config.model_name}") as run:
         
-        # Create trainer with best epochs
-        trainer = pl.Trainer(
-            max_epochs=self.best_params['epochs'],
-            accelerator='auto',
-            devices='auto',
-            logger=mlflow_logger,
-            callbacks=[checkpoint_callback],
-            enable_progress_bar=True,
-            enable_model_summary=True,
-            log_every_n_steps=50,
-        )
-        
-        # Train the model
-        trainer.fit(
-            model=lightning_model,
-            train_dataloaders=train_loader,
-            val_dataloaders=valid_loader
-        )
-        
-        # Save the final model
-        logger.info(f"Saving final model to {self.config.trained_model_path}")
-        torch.save(lightning_model.model, self.config.trained_model_path)
-        logger.info(f"Final model saved to {self.config.trained_model_path}")
+            # Log parameters (same as optimization trials)
+            mlflow.log_params({
+                'learning_rate': self.best_params['learning_rate'],
+                'batch_size': self.best_params['batch_size'], 
+                'epochs': self.best_params['epochs'],
+                'model_name': self.config.model_name,
+                'stage': 'final_training'
+            })
+            
+            # Get base model
+            self.get_base_model()
+            
+            # Create data loaders with best batch size
+            train_loader, valid_loader = self.train_valid_generator(self.best_params['batch_size'])
+            
+            # Create Lightning model with best learning rate
+            lightning_model = LightningModel(
+                model=self.model,
+                learning_rate=self.best_params['learning_rate']
+            )
+            
+            # Set up model checkpointing
+            checkpoint_callback = ModelCheckpoint(
+                dirpath=self.config.root_dir,
+                filename=f"best_model_{self.config.model_name}",
+                monitor="val_loss",
+                mode="min",
+                save_top_k=1
+            )
 
-        # Log best scores
-        best_scores = {k: (v.item() if hasattr(v, "item") else v) for k, v in trainer.callback_metrics.items()}
+            # Use the SAME experiment as optimization, and associate with nested run
+            mlflow_logger = MLFlowLogger(
+                experiment_name=f"best_models",
+                tracking_uri=self.config.mlflow_uri,
+                run_id=run.info.run_id  # Associate with this nested run
+            )
 
-        # Save to a JSON file
-        best_scores_path = Path(self.config.root_dir) / f"best_scores_{self.config.model_name}.json"
-        with open(best_scores_path, "w") as f:
-            json.dump(best_scores, f, indent=2)
-        
-        return trainer.callback_metrics
+            # Create trainer with best epochs
+            trainer = pl.Trainer(
+                max_epochs=self.best_params['epochs'],
+                accelerator='auto',
+                devices='auto',
+                logger=mlflow_logger,
+                callbacks=[checkpoint_callback],
+                enable_progress_bar=True,
+                enable_model_summary=True,
+                log_every_n_steps=50,
+            )
+            
+            # Train the model
+            trainer.fit(
+                model=lightning_model,
+                train_dataloaders=train_loader,
+                val_dataloaders=valid_loader
+            )
+            
+            # Log final metrics to the nested run
+            final_metrics = {}
+            for key, value in trainer.callback_metrics.items():
+                if value is not None:
+                    final_metrics[key] = value.item() if hasattr(value, 'item') else value
+            
+            mlflow.log_metrics(final_metrics)
+            
+            # Save the final model
+            logger.info(f"Saving final model to {self.config.trained_model_path}")
+            torch.save(lightning_model.model, self.config.trained_model_path)
+            logger.info(f"Final model saved to {self.config.trained_model_path}")
+
+            # Save best scores to JSON 
+            best_scores = final_metrics
+            best_scores_path = Path(self.config.root_dir) / f"best_scores_{self.config.model_name}.json"
+            save_json(best_scores_path, best_scores)
+            
+            return trainer.callback_metrics

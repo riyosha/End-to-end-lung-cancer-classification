@@ -5,8 +5,8 @@ stages:
     deps:
     - path: config/config.yaml
       hash: md5
-      md5: f16efef6554e73eb1c60f0f8e777d2c0
-      size: 1095
+      md5: 7c394f26f6e6210446b1b015f1eee2d5
+      size: 1183
     - path: src/cvClassifier/pipeline/S01_data_ingestion.py
       hash: md5
       md5: b96c9316e45ef5798ba5875c61a540e2
@@ -22,8 +22,8 @@ stages:
     deps:
     - path: config/config.yaml
       hash: md5
-      md5: f16efef6554e73eb1c60f0f8e777d2c0
-      size: 1095
+      md5: 7c394f26f6e6210446b1b015f1eee2d5
+      size: 1183
     - path: src/cvClassifier/pipeline/S02_model_preparation.py
       hash: md5
       md5: 8161a047721d32163f463d8fc3bc3ea5
@@ -41,7 +41,7 @@ stages:
     outs:
     - path: artifacts/model_preparation
       hash: md5
-      md5: c42a618c370e1b54ca03c808243b78bc.dir
+      md5: 2dc9f90ac361eac3d0d9b168992a179b.dir
       size: 153692068
       nfiles: 2
   model_training:
@@ -54,20 +54,20 @@ stages:
       nfiles: 1004
     - path: artifacts/model_preparation
       hash: md5
-      md5: c42a618c370e1b54ca03c808243b78bc.dir
+      md5: 2dc9f90ac361eac3d0d9b168992a179b.dir
       size: 153692068
       nfiles: 2
     - path: config/config.yaml
       hash: md5
-      md5: f16efef6554e73eb1c60f0f8e777d2c0
-      size: 1095
+      md5: 7c394f26f6e6210446b1b015f1eee2d5
+      size: 1183
     - path: src/cvClassifier/components/model_training.py
       hash: md5
-      md5: 8de424dbc5efe03e1d8672411a1b89e5
-      size: 17450
+      md5: 2d7289996490c2b372f0812ceb335631
+      size: 20135
     - path: src/cvClassifier/pipeline/S03_model_training.py
       hash: md5
-      md5: fe99f17535bef4dd7b433aee3327dbf8
+      md5: 262a3161549039fd9663eef326bcd15a
       size: 1091
     params:
       params.yaml:
@@ -77,7 +77,7 @@ stages:
         - 16
         EPOCHS: 1
         EPOCHS_OPTIONS:
-        - 1
+        - 2
         IMAGE_SIZE:
         - 224
         - 224
@@ -86,16 +86,16 @@ stages:
         LEARNING_RATE_RANGE:
         - 0.001
         - 0.01
-        N_TRIALS: 1
+        N_TRIALS: 2
         TIMEOUT: 7200
     outs:
     - path: artifacts/model_training/trained_model_resnet50.pth
       hash: md5
-      md5: 7bef10c0b7254dcaa6f4ce4ffe5c2831
+      md5: 742691df2d4a68e312f82f428466b531
       size: 94411310
     - path: artifacts/model_training/trained_model_vgg16.pth
       hash: md5
-      md5: 3e9de571e42b41d665fe2c60a6e13109
+      md5: ae7390e2a8c6a7f3f12386547ab7576c
       size: 59278786
   model_evaluation:
     cmd: python src/cvClassifier/pipeline/S04_model_evaluation.py
@@ -105,18 +105,26 @@ stages:
       md5: aa93df70650f0a7f1d594ec7f562a6f1.dir
       size: 124987534
       nfiles: 1004
-    - path: artifacts/model_training/model.pth
+    - path: artifacts/model_training/trained_model_resnet50.pth
       hash: md5
-      md5: fb87d4321c0e385c7f8b9aa5942a27c6
-      size: 59276610
+      md5: 742691df2d4a68e312f82f428466b531
+      size: 94411310
+    - path: artifacts/model_training/trained_model_resnet50.pth
+      hash: md5
+      md5: 742691df2d4a68e312f82f428466b531
+      size: 94411310
     - path: config/config.yaml
       hash: md5
-      md5: 86e17afc848960c02d3c9936e8e59099
-      size: 1120
+      md5: 7c394f26f6e6210446b1b015f1eee2d5
+      size: 1183
+    - path: src/cvClassifier/components/model_evaluation.py
+      hash: md5
+      md5: a0a1ac535fba90ab2cdd4a99cb0f9f1a
+      size: 6225
     - path: src/cvClassifier/pipeline/S04_model_evaluation.py
       hash: md5
-      md5: c5bd67f8d964bcc128eafa05021a1233
-      size: 808
+      md5: 76b0238a32d816d10f1ca8e669995fcc
+      size: 904
     params:
       params.yaml:
         BATCH_SIZE: 16
@@ -125,7 +133,11 @@ stages:
         - 224
         - 3
     outs:
-    - path: artifacts/model_evaluation/scores.json
+    - path: artifacts/model_evaluation/final_scores.json
       hash: md5
-      md5: f644e935cf6fb8c100c1d6fb97adee05
-      size: 70
+      md5: cd9c0508f7031d3714c2bb38024857b4
+      size: 122
+    - path: model/model.pth
+      hash: md5
+      md5: ae7390e2a8c6a7f3f12386547ab7576c
+      size: 59278786

@@ -29,3 +29,4 @@ model_evaluation:
   root_dir: artifacts/model_evaluation
   scores_path: artifacts/model_training
   final_model_path: model/model.pth
+  final_scores_path: artifacts/model_evaluation/final_scores.json

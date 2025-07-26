@@ -49,11 +49,13 @@ stages:
     deps:
       - src/cvClassifier/pipeline/S04_model_evaluation.py
       - src/cvClassifier/components/model_evaluation.py
-      - artifacts/model_training/model.pth
+      - artifacts/model_training/trained_model_resnet50.pth
+      - artifacts/model_training/trained_model_resnet50.pth
       - artifacts/data_ingestion/Data
       - config/config.yaml
     params:
       - IMAGE_SIZE
       - BATCH_SIZE
     outs:
-      - artifacts/model_evaluation/scores.json
+      - artifacts/model_evaluation/final_scores.json
+      - model/model.pth

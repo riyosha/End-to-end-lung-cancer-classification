@@ -33,6 +33,7 @@ os.environ["MLFLOW_TRACKING_PASSWORD"]=os.getenv("MLFLOW_TRACKING_PASSWORD")
 class ModelEvaluation:
     def __init__(self, config: ModelEvalConfig):
         self.config = config
+        self.best_model_name = None
 
     def load_model(self, path: Path) -> nn.Module:
         return torch.load(path)
@@ -109,7 +110,7 @@ class ModelEvaluation:
         else:
             logger.info('No results returned from evaluation.')
         
-        self.save_score(f'{self.config.scores_path}/final_scores.json')
+        self.save_score()
     
     
     def log_into_mlflow(self):
@@ -129,7 +130,7 @@ class ModelEvaluation:
                 # There are other ways to use the Model Registry, which depends on the use case,
                 # please refer to the doc for more information:
                 # https://mlflow.org/docs/latest/model-registry.html#api-workflow
-                mlflow.pytorch.log_model(self.model, "model", registered_model_name="VGG16Model")
+                mlflow.pytorch.log_model(self.model, "model", registered_model_name= self.best_model_name)
             else:
                 mlflow.pytorch.log_model(self.model, "model")
 
@@ -152,6 +153,7 @@ class ModelEvaluation:
             if score is not None and score > best_score:
                 best_score = score
                 best_model = model_name
+                self.best_model_name = model_name
                 best_model_path = model_path
 
         if best_model_path:
@@ -162,7 +164,7 @@ class ModelEvaluation:
         else:
             raise RuntimeError("No valid models found for selection.")
 
-    def save_score(self, scores_path):
+    def save_score(self):
         """Save evaluation scores to JSON file"""
 
-        save_json(path=Path(scores_path), data=self.scores)
+        save_json(path=Path(self.config.final_scores_path), data=self.scores)

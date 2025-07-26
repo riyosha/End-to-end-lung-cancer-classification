@@ -101,7 +101,8 @@ class ConfigurationManager:
             params_batch_size = params.BATCH_SIZE,
             mlflow_uri = self.config.model_evaluation.mlflow_tracking_uri,
             scores_path = self.config.model_evaluation.scores_path,
-            final_model_path = self.config.model_evaluation.final_model_path
+            final_model_path = self.config.model_evaluation.final_model_path,
+            final_scores_path = self.config.model_evaluation.final_scores_path
         )
 
         return model_eval_config

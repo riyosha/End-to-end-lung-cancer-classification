@@ -10,7 +10,7 @@ class ModelTrainingPipeline:
 
     def main(self):
         config = ConfigurationManager()
-        models = ['vgg16', 'resnet50']
+        models = ['resnet50', 'vgg16']
         for model_name in models:
             training_config = config.get_model_training_config(model_name=model_name)
             training = ModelTraining(config=training_config)
