@@ -63,8 +63,8 @@ stages:
       size: 1183
     - path: src/cvClassifier/components/model_training.py
       hash: md5
-      md5: 2d7289996490c2b372f0812ceb335631
-      size: 20135
+      md5: 2537a213a346f1260237a1d306182721
+      size: 20160
     - path: src/cvClassifier/pipeline/S03_model_training.py
       hash: md5
       md5: 262a3161549039fd9663eef326bcd15a
@@ -75,9 +75,13 @@ stages:
         BATCH_SIZE: 16
         BATCH_SIZE_OPTIONS:
         - 16
+        - 32
+        - 64
         EPOCHS: 1
         EPOCHS_OPTIONS:
-        - 2
+        - 25
+        - 100
+        - 200
         IMAGE_SIZE:
         - 224
         - 224
@@ -86,16 +90,16 @@ stages:
         LEARNING_RATE_RANGE:
         - 0.001
         - 0.01
-        N_TRIALS: 2
+        N_TRIALS: 10
         TIMEOUT: 7200
     outs:
     - path: artifacts/model_training/trained_model_resnet50.pth
       hash: md5
-      md5: 742691df2d4a68e312f82f428466b531
+      md5: 3555bb02c63a07dbf4a4817ab53df991
       size: 94411310
     - path: artifacts/model_training/trained_model_vgg16.pth
       hash: md5
-      md5: ae7390e2a8c6a7f3f12386547ab7576c
+      md5: e3888df0ec12bae4b24d315f1b0672d2
       size: 59278786
   model_evaluation:
     cmd: python src/cvClassifier/pipeline/S04_model_evaluation.py
@@ -107,11 +111,11 @@ stages:
       nfiles: 1004
     - path: artifacts/model_training/trained_model_resnet50.pth
       hash: md5
-      md5: 742691df2d4a68e312f82f428466b531
+      md5: 3555bb02c63a07dbf4a4817ab53df991
       size: 94411310
     - path: artifacts/model_training/trained_model_resnet50.pth
       hash: md5
-      md5: 742691df2d4a68e312f82f428466b531
+      md5: 3555bb02c63a07dbf4a4817ab53df991
       size: 94411310
     - path: config/config.yaml
       hash: md5
@@ -119,8 +123,8 @@ stages:
       size: 1183
     - path: src/cvClassifier/components/model_evaluation.py
       hash: md5
-      md5: a0a1ac535fba90ab2cdd4a99cb0f9f1a
-      size: 6225
+      md5: fd594a7eb7cf3b20eef91c7971eb2d2e
+      size: 6450
     - path: src/cvClassifier/pipeline/S04_model_evaluation.py
       hash: md5
       md5: 76b0238a32d816d10f1ca8e669995fcc
@@ -139,5 +143,5 @@ stages:
       size: 122
     - path: model/model.pth
       hash: md5
-      md5: ae7390e2a8c6a7f3f12386547ab7576c
-      size: 59278786
+      md5: 3555bb02c63a07dbf4a4817ab53df991
+      size: 94411310

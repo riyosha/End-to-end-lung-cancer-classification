@@ -386,7 +386,7 @@ class ModelTraining:
             logger.warning("Found active MLflow run. Ending it before starting new run.")
             mlflow.end_run()
 
-        with mlflow.start_run(run_name=f"hyperparameter_tuning_{self.self.config.model_name}") as parent_run:
+        with mlflow.start_run(run_name=f"hyperparameter_tuning_{self.config.model_name}") as parent_run:
         
             # Log parent run metadata
             mlflow.log_param("model_architecture", self.config.model_name)

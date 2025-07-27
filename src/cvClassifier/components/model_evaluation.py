@@ -120,7 +120,12 @@ class ModelEvaluation:
         with mlflow.start_run():
             mlflow.log_params(self.config.all_params)
             mlflow.log_metrics(
-                {"loss": self.scores['loss'], "accuracy": self.scores['accuracy']}
+                {"loss": self.scores['loss'], 
+                "accuracy": self.scores['accuracy'],
+                "precision": self.scores['precision'],
+                "recall": self.scores['recall'],
+                "f1_score": self.scores['f1_score'],
+                "auc_roc": self.scores['auc_roc']}
             )
 
             # Model registry does not work with file store
