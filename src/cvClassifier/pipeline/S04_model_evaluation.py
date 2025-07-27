@@ -16,6 +16,7 @@ class ModelEvaluationPipeline:
         model_eval.select_best_model(model_names=models)
         model_eval.evaluation()
         model_eval.log_into_mlflow()
+        model_eval.push_model_to_s3()
 
 
 if __name__ == '__main__':

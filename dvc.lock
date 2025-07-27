@@ -123,12 +123,12 @@ stages:
       size: 1183
     - path: src/cvClassifier/components/model_evaluation.py
       hash: md5
-      md5: fd594a7eb7cf3b20eef91c7971eb2d2e
-      size: 6450
+      md5: dda818fdb772fa738274a0606e2ac88e
+      size: 8210
     - path: src/cvClassifier/pipeline/S04_model_evaluation.py
       hash: md5
-      md5: 76b0238a32d816d10f1ca8e669995fcc
-      size: 904
+      md5: 05031faade4aff2f168eb0c6e107f2ca
+      size: 942
     params:
       params.yaml:
         BATCH_SIZE: 16

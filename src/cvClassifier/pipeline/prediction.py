@@ -21,10 +21,10 @@ class PredictionPipeline:
         ])
 
         self.class_names = [
-            'adenocarcinoma_left.lower.lobe_T2_N0_M0_Ib',
-            'large.cell.carcinoma_left.hilum_T2_N2_M0_IIIa',
-            'normal',
-            'squamous.cell.carcinoma_left.hilum_T1_N2_M0_IIIa'
+            'Adenocarcinoma, Stage Ib',
+            'Large Cell, Stage IIIa',
+            'Normal',
+            'Squamous Cell, Stage IIIa'
         ]
 
 

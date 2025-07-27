@@ -1,5 +1,7 @@
 import os
 import shutil
+import boto3
+import pandas as pd
 
 from urllib.parse import urlparse
 import torch
@@ -173,3 +175,47 @@ class ModelEvaluation:
         """Save evaluation scores to JSON file"""
 
         save_json(path=Path(self.config.final_scores_path), data=self.scores)
+
+    
+    def push_model_to_s3(self):
+        """Push final model to S3 after evaluation"""
+        try:
+            # S3 configuration
+            bucket_name = os.getenv("S3_MODEL_BUCKET")
+            s3_key = "model/model.pth"
+            
+            # Initialize S3 client
+            s3_client = boto3.client('s3')
+            
+            # Upload model
+            model_path = Path(self.config.final_model_path)
+            if model_path.exists():
+                logger.info(f"Uploading model to S3: s3://{bucket_name}/{s3_key}")
+                s3_client.upload_file(
+                    str(model_path), 
+                    bucket_name, 
+                    s3_key,
+                    ExtraArgs={'ContentType': 'application/octet-stream'}
+                )
+                
+                model_url = f"https://{bucket_name}.s3.amazonaws.com/{s3_key}"
+                logger.info(f"Model uploaded successfully: {model_url}!")
+                
+                # Save S3 info for reference
+                s3_info = {
+                    "s3_url": model_url,
+                    "bucket": bucket_name,
+                    "key": s3_key,
+                    "model_metrics": self.scores,
+                    "upload_timestamp": str(pd.Timestamp.now())
+                }
+                
+                info_path = Path("artifacts/model_evaluation/s3_model_info.json")
+                save_json(path=info_path, data=s3_info)
+                
+            else:
+                logger.error(f"Model file not found: {model_path}")
+                
+        except Exception as e:
+            logger.error(f"Failed to upload model to S3: {e}")
+            # Don't raise - let evaluation complete even if S3 upload fails
