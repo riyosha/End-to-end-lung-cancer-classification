@@ -2,6 +2,7 @@
 Flask
 Flask-Cors
 dvc
+dvc[s3]
 ensure==1.0.2
 gdown
 joblib
