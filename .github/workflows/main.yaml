@@ -82,14 +82,34 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
       
       
-      - name: Pull latest images
+      - name: Check disk space before cleanup
+        run: df -h
+
+      - name: Cleanup Docker resources
         run: |
-         docker pull ${{secrets.AWS_ECR_LOGIN_URI}}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
-         
-      - name: Stop and remove container if running
+          # Remove stopped containers
+          docker container prune -f
+          # Remove unused images
+          docker image prune -a -f
+          # Remove unused volumes
+          docker volume prune -f
+          # Remove build cache
+          docker builder prune -a -f
+
+      - name: Stop and remove existing container
         run: |
-         docker ps -q --filter "name=cnncls" | grep -q . && docker stop cnncls && docker rm -fv cnncls
-       
+          # Check if container exists and stop/remove it
+          if docker ps -a --filter "name=cnncls" --format "{{.Names}}" | grep -q "^cnncls$"; then
+            echo "Stopping and removing existing container..."
+            docker stop cnncls || true
+            docker rm -fv cnncls || true
+          else
+            echo "No existing container found"
+          fi
+
+      - name: Pull latest image
+        run: |
+          docker pull ${{secrets.AWS_ECR_LOGIN_URI}}/${{ secrets.ECR_REPOSITORY_NAME }}:latest     
       - name: Run Docker Image to serve users
         run: |
          docker run -d -p 8080:8080 --name=cnncls -e 'AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}' -e 'AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -e 'AWS_REGION=${{ secrets.AWS_REGION }}'  ${{secrets.AWS_ECR_LOGIN_URI}}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
