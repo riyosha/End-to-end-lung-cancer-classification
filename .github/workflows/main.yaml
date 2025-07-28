@@ -37,8 +37,12 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y jq unzip
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -46,7 +50,7 @@ jobs:
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
@@ -55,13 +59,28 @@ jobs:
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
           IMAGE_TAG: latest
         run: |
-          # Build a docker container and
-          # push it to ECR so that it can
-          # be deployed to ECS.
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          # Enable BuildKit for faster builds
+          export DOCKER_BUILDKIT=1
           
+          # Build with cache from ECR
+          docker buildx build \
+            --platform linux/amd64 \
+            --cache-from $ECR_REGISTRY/$ECR_REPOSITORY:cache \
+            --cache-to $ECR_REGISTRY/$ECR_REPOSITORY:cache,mode=max \
+            --tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            --push \
+            .
+          
+          # Also push cache layer
+          docker buildx build \
+            --platform linux/amd64 \
+            --cache-from $ECR_REGISTRY/$ECR_REPOSITORY:cache \
+            --cache-to $ECR_REGISTRY/$ECR_REPOSITORY:cache,mode=max \
+            --tag $ECR_REGISTRY/$ECR_REPOSITORY:cache \
+            --push \
+            .
+          
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
           
   Continuous-Deployment:
     needs: build-and-push-ecr-image
@@ -71,7 +90,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -79,26 +98,20 @@ jobs:
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-      
+        uses: aws-actions/amazon-ecr-login@v2
       
       - name: Check disk space before cleanup
         run: df -h
 
       - name: Cleanup Docker resources
         run: |
-          # Remove stopped containers
           docker container prune -f
-          # Remove unused images
           docker image prune -a -f
-          # Remove unused volumes
           docker volume prune -f
-          # Remove build cache
           docker builder prune -a -f
 
       - name: Stop and remove existing container
         run: |
-          # Check if container exists and stop/remove it
           if docker ps -a --filter "name=cnncls" --format "{{.Names}}" | grep -q "^cnncls$"; then
             echo "Stopping and removing existing container..."
             docker stop cnncls || true
@@ -110,9 +123,15 @@ jobs:
       - name: Pull latest image
         run: |
           docker pull ${{secrets.AWS_ECR_LOGIN_URI}}/${{ secrets.ECR_REPOSITORY_NAME }}:latest     
+
       - name: Run Docker Image to serve users
         run: |
-         docker run -d -p 8080:8080 --name=cnncls -e 'AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}' -e 'AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}' -e 'AWS_REGION=${{ secrets.AWS_REGION }}'  ${{secrets.AWS_ECR_LOGIN_URI}}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
+         docker run -d -p 8080:8080 --name=cnncls \
+           -e 'AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}' \
+           -e 'AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}' \
+           -e 'AWS_REGION=${{ secrets.AWS_REGION }}' \
+           ${{secrets.AWS_ECR_LOGIN_URI}}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
+
       - name: Clean previous images and containers
         run: |
          docker system prune -f
