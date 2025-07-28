@@ -18,12 +18,11 @@ Flask-Cors==5.0.0
 # MLOps & Tracking
 mlflow==2.2.2
 
-# DVC & Storage
-dvc==3.42.0
-dvc[s3]==3.0.1
+# DVC & Storage (CONSERVATIVE - definitely works with Python 3.8)
+dvc[s3]==2.58.2
 
 # Optimization
-optuna==4.4.0
+optuna==3.3.0
 
 # Development Tools
 notebook==7.3.3
