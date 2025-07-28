@@ -1,49 +1,43 @@
-# Local package 
--e .
-
-# Web Framework
-Flask==2.3.3
-Flask-Cors==4.0.0
-
-# Environment
-python-dotenv==1.0.0
-
-# DVC & Storage
-dvc==3.20.0
-dvc[s3]==3.20.0
-
-# Utilities
-ensure==1.0.2
-gdown==4.7.1
-
-# Data Science Stack
-joblib==1.3.2
-matplotlib==3.7.2
-numpy==1.24.3
-pandas==2.0.3
-scipy==1.10.1
-seaborn==0.12.2
-
-# ML Framework
+# Core ML Framework (heaviest packages first for Docker layer caching)
 torch==2.4.1
 torchvision==0.19.1
 pytorch-lightning==2.4.0
 
+# Data Science Stack
+numpy==1.24.3
+pandas==2.0.3
+scipy==1.10.1
+matplotlib==3.7.5
+seaborn==0.13.2
+joblib==1.4.2
+
+# Web Framework
+Flask==2.3.3
+Flask-Cors==5.0.0
+
 # MLOps & Tracking
 mlflow==2.2.2
 
+# DVC & Storage
+dvc==3.42.0
+dvc[s3]==3.0.1
+
 # Optimization
-optuna==3.3.0
+optuna==4.4.0
 
 # Development Tools
-notebook==7.0.2
+notebook==7.3.3
 
-# Configuration
-PyYAML==6.0.1
+# Utilities
+python-dotenv==1.0.1
+PyYAML==6.0.2
 python-box==6.0.2
-
-# Progress bars
-tqdm==4.66.1
+tqdm==4.67.1
+gdown==5.2.0
+ensure==1.0.2
 
 # Type hints
-types-PyYAML
+types-PyYAML==6.0.12.20241230
+
+# Local package (install last)
+-e .
