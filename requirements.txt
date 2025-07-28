@@ -1,6 +1,7 @@
 -e .
 Flask
 Flask-Cors
+dotenv
 dvc
 dvc[s3]
 ensure==1.0.2
