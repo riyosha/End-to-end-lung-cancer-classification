@@ -13,8 +13,6 @@ from cvClassifier.constants import *
 from cvClassifier.utils.common import read_yaml, create_directories
 from cvClassifier import logger
 
-from dotenv import load_dotenv
-load_dotenv()
 
 class PredictionPipeline:
     def __init__(self, filename, config_filepath = CONFIG_FILE_PATH, params_filepath = PARAMS_FILE_PATH):
@@ -24,7 +22,7 @@ class PredictionPipeline:
         self.filename = filename
 
         # S3 configuration
-        self.s3_bucket = os.getenv("S3_MODEL_BUCKET")
+        self.s3_bucket = 'chest-cancer-classifier'
         self.s3_key = "model/model.pth"
         self.local_model_path = "/tmp/model.pth"  # Cache in container
 
