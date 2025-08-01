@@ -78,7 +78,6 @@ cd End-to-end-chest-cancer-classification
 ```
 
 ### 2. Setup Environment
-
 ```bash
 # Create virtual environment
 conda create -n chest-cancer python=3.8 -y
