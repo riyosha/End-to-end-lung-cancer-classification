@@ -66,7 +66,6 @@ class LightningModel(pl.LightningModule):
         preds_labels = outputs.argmax(dim=-1) # Predicted class labels for precision/recall/f1 if not using probabilities
 
         # Update with probabilities for AUROC, and with predicted labels/probabilities for others
-        # Depending on the metric, it might expect one-hot encoded targets or class indices.
         # For Multiclass metrics, typically raw logits or probabilities and integer class labels are used.
         self.val_precision.update(preds_probs, labels)
         self.val_recall.update(preds_probs, labels)
