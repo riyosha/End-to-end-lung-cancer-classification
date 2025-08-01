@@ -120,7 +120,7 @@ class ModelEvaluation:
         tracking_url_type_store = urlparse(mlflow.get_tracking_uri()).scheme
         
         with mlflow.start_run():
-            mlflow.log_params(self.config.all_params)
+            mlflow.log_params(self.best_params)
             mlflow.log_metrics(
                 {"loss": self.scores['loss'], 
                 "accuracy": self.scores['accuracy'],
@@ -162,6 +162,7 @@ class ModelEvaluation:
                 best_model = model_name
                 self.best_model_name = model_name
                 best_model_path = model_path
+                self.best_params = Path(self.config.scores_path) / f"best_params_{model_name}.json"
 
         if best_model_path:
             # Ensure destination directory exists

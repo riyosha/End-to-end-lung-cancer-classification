@@ -197,3 +197,4 @@ artifacts/*
 research/Data/*
 lightning_logs/*
 *.env
+research/*
