@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Only install non-PyTorch packages
 COPY requirements-light.txt .
-RUN pip install --no-cache-dir -r requirements-light.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 CMD ["python3", "app.py"]
