@@ -4,7 +4,7 @@ RUN apt update -y && apt install awscli -y
 WORKDIR /app
 
 # Only install non-PyTorch packages
-COPY requirements-light.txt .
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
