@@ -99,8 +99,8 @@ class ModelEvaluation:
         if test_results and len(test_results) > 0:
             # test_results[0] will have all logged metrics
             self.scores = {
-                "loss": test_results[0].get('test_loss', 0.0),
-                "accuracy": test_results[0].get('test_accuracy', 0.0),
+                "loss": test_results[0].get('test_loss_epoch', 0.0),
+                "accuracy": test_results[0].get('test_acc_epoch', 0.0),
                 "precision": test_results[0].get('test_precision', 0.0),
                 "recall": test_results[0].get('test_recall', 0.0),
                 "f1_score": test_results[0].get('test_f1_score', 0.0),
@@ -118,8 +118,10 @@ class ModelEvaluation:
     def log_into_mlflow(self):
         mlflow.set_registry_uri(self.config.mlflow_uri)
         tracking_url_type_store = urlparse(mlflow.get_tracking_uri()).scheme
+
+        run_name = f"final_model_eval_{self.best_model_name}-{pd.Timestamp.now().strftime('%Y%m%d-%H%M%S')}"
         
-        with mlflow.start_run():
+        with mlflow.start_run(run_name=run_name):
             mlflow.log_params(self.best_params)
             mlflow.log_metrics(
                 {"loss": self.scores['loss'], 
@@ -162,7 +164,7 @@ class ModelEvaluation:
                 best_model = model_name
                 self.best_model_name = model_name
                 best_model_path = model_path
-                self.best_params = Path(self.config.scores_path) / f"best_params_{model_name}.json"
+                self.best_params = load_json(Path(self.config.scores_path) / f"best_params_{model_name}.json")
 
         if best_model_path:
             # Ensure destination directory exists
