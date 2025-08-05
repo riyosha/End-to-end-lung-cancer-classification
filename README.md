@@ -10,7 +10,7 @@ A production-ready MLOps pipeline for Non-Small Cell Lung Cancer (NSCLC) classif
 
 ## 🎯 Project Overview
 
-This project uses transfer learning with pre-trained CNN models (ResNet50 and VGG16) to classify chest X-ray images for lung cancer detection. The implementation follows MLOps best practices with automated pipelines, experiment tracking, and containerized deployment.
+This project uses transfer learning with pre-trained CNN models (ResNet50 and VGG16) to classify chest CT scan images for lung cancer subtype classification. The system can distinguish between normal tissue and three major types of Non-Small Cell Lung Cancer (NSCLC): adenocarcinoma, large cell carcinoma, and squamous cell carcinoma. The implementation follows MLOps best practices with automated pipelines, experiment tracking, and containerized deployment.
 
 **Live Demo:** [http://34.221.223.5:8080/](http://34.221.223.5:8080/)
 
