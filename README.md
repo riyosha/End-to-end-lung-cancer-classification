@@ -237,13 +237,17 @@ N_TRIALS: 10
 TIMEOUT: 7200 
 ```
 
+## Limitations
+
+The dataset used is not clinically validated and can contain some data leakage and undesired data collection artifacts.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
 
-- Dataset providers for chest CT images
+- Dataset providers for chest CT images (https://www.kaggle.com/datasets/mohamedhanyyy/chest-ctscan-images/data)
 - PyTorch and PyTorch Lightning communities
 - MLflow for experiment tracking capabilities
 - AWS for cloud infrastructure
