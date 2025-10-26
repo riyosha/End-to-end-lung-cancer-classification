@@ -16,10 +16,10 @@ This project uses transfer learning with pre-trained CNN models (ResNet50 and VG
 
 ## Key Features
 
-- **🤖 Deep Learning Model**: Transfer learning with ResNet/VGG architectures
-- **📊 MLflow Integration**: Experiment tracking and model versioning with MLFlow
-- **🐳 Docker Containerization**: Scalable deployment with Docker
-- **☁️ AWS Cloud Integration**: ECR for container registry, S3 for model storage
+- **Deep Learning Model**: Transfer learning with ResNet/VGG architectures
+- **MLflow Integration**: Experiment tracking and model versioning with MLFlow
+- **Docker Containerization**: Scalable deployment with Docker
+- **AWS Cloud Integration**: ECR for container registry, S3 for model storage
 - **CI/CD Pipeline**: Automated building, testing, and deployment
 - **DVC Pipeline**: Data versioning and reproducible ML pipelines
 - **Web Interface**: Flask-based UI for real-time predictions
